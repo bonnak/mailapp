@@ -1,0 +1,7 @@
+.container #txt-msg{
+	max-width: 100%;
+	min-height: 300px;
+}
+.container #btn-send{
+	width: 131px;
+}
