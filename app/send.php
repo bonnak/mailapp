@@ -1,6 +1,7 @@
 <?php
 
 use Mailgun\Mailgun;
+use Mailgun\Connection\Exceptions as MailgunExceptions;
 
 // Instantiate the client.
 $mgClient = new Mailgun(MAILGUN_KEY);
@@ -13,17 +14,41 @@ $list = $mgClient->get('lists')->http_response_body;
 
 if(isset($_POST['mail-to'], $_POST['subject'], $_POST['message']))
 {
-	$mail_to = $_POST['mail-to'];
+	$addressList = $_POST['mail-to'];
 	$subject = $_POST['subject'];
 	$message = $_POST['message'];
 
-	// Make the call to the client.
-	$result = $mgClient->sendMessage(MAILGUN_DOMAIN, array(
-	    'from'    => 'noreply@mailgun.org',
-	    'to'      => $mail_to,
-	    'subject' => $subject,
-	    'text'    => $message
-	));
+	$r_validation = $mgValidate->get("address/parse", array('addresses' => $addressList));
+
+	if(!empty($r_validation->http_response_body->unparseable))
+	{
+		$unparseables = $r_validation->http_response_body->unparseable;
+		$error_str = '';
+
+		foreach ($unparseables as $invalid_mail) 
+		{
+			$error_str .= $invalid_mail . ', ';
+		}
+
+		$error_str = trim($error_str, ',') . ' is invalid email address.';
+
+	}
+	else
+	{
+		try
+		{
+			$result = $mgClient->sendMessage(MAILGUN_DOMAIN, array(
+			    'from'    => 'noreply@itscholar.org',
+			    'to'      => $addressList,
+			    'subject' => $subject,
+			    'text'    => $message
+			));
+		}
+		catch(Exception $ex)
+		{
+			die();
+		}
+	}	
 }
 
 ?>
@@ -45,15 +70,13 @@ if(isset($_POST['mail-to'], $_POST['subject'], $_POST['message']))
 </head>
 <body>
 	<?php if(isset($result)): ?>
-		<?php if($result->http_response_code == 200): ?>
-			<div class="inform-box alert-success">
-				<span>Message sent successfully.</span>
-			</div>
-		<?php else: ?>
-			<div class="inform-box alert-danger">
-				<span>Message sent successfully.</span>
-			</div>
-		<?php endif ?>
+		<div class="inform-box alert-success">
+			<span>Message sent successfully.</span>
+		</div>
+	<?php elseif(isset($error_str)): ?>
+		<div class="inform-box alert-danger">
+			<span><?php echo $error_str ?></span>
+		</div>
 	<?php endif ?>
 	<div class="container box-shadow">
 		<form method="post" id="frm-send-mail">
