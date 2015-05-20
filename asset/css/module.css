@@ -5,3 +5,22 @@
 .container #btn-send{
 	width: 131px;
 }
+@-webkit-keyframes opt {
+    0% {opacity: 0;}
+    50% {opacity: 1;}
+    100% {opacity: 0;}
+}
+@keyframes opt {
+    0% {opacity: 0;}
+    50% {opacity: 1;}
+    100% {opacity: 0;}
+}
+.inform-box{
+	position: absolute;
+	width: 100%;
+	padding: 8px 0;	 
+	text-align: center;
+	z-index: 100;
+	-webkit-animation: opt 5s 1; 
+	animation: opt 5s 1; 
+}

@@ -6,25 +6,28 @@ use Mailgun\Mailgun;
 $mgClient = new Mailgun(MAILGUN_KEY);
 $mgValidate = new Mailgun(MAILGUN_PUBKEY);
 
+// Get mail list.
 $list = $mgClient->get('lists')->http_response_body;
 
 // echo '<pre>', print_r($list->items), '</pre>';
 
-if(isset($_POST['subject'], $_POST['message']))
+if(isset($_POST['mail-to'], $_POST['subject'], $_POST['message']))
 {
+	$mail_to = $_POST['mail-to'];
 	$subject = $_POST['subject'];
 	$message = $_POST['message'];
 
 	// Make the call to the client.
-	$mgClient->sendMessage(MAILGUN_DOMAIN, array(
+	$result = $mgClient->sendMessage(MAILGUN_DOMAIN, array(
 	    'from'    => 'noreply@mailgun.org',
-	    'to'      => MAILGUN_LIST,
+	    'to'      => $mail_to,
 	    'subject' => $subject,
 	    'text'    => $message
 	));
 }
 
 ?>
+<!DOCTYPE html>
 <html>
 <head>
 	<meta charset="utf-8">
@@ -38,16 +41,28 @@ if(isset($_POST['subject'], $_POST['message']))
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script type="text/javascript" src="asset/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="asset/js/global.js"></script>
 </head>
 <body>
+	<?php if(isset($result)): ?>
+		<?php if($result->http_response_code == 200): ?>
+			<div class="inform-box alert-success">
+				<span>Message sent successfully.</span>
+			</div>
+		<?php else: ?>
+			<div class="inform-box alert-danger">
+				<span>Message sent successfully.</span>
+			</div>
+		<?php endif ?>
+	<?php endif ?>
 	<div class="container box-shadow">
-		<form method="post">
+		<form method="post" id="frm-send-mail">
 			<div class="form-group">
 		    	<label for="txt-send-to">To</label>
 	    		<div class="input-group">
-	    			<input type="text" class="form-control" id="txt-send-to">
+	    			<input type="text" class="form-control" id="txt-send-to" name="mail-to">
 	    			<span class="input-group-btn">
-	    				<button type="button" class="btn btn-default" id="btn-list" data-toggle="modal" data-target="#myModal">...</button>
+	    				<button type="button" class="btn btn-default" id="btn-list" data-toggle="modal" data-target="#mail-list-modal">...</button>
 	    			</span>
 	    		</div>
 		 	</div>
@@ -65,7 +80,7 @@ if(isset($_POST['subject'], $_POST['message']))
 		</form>
 	</div>
 	<!-- Modal -->
-	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal fade" id="mail-list-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header" style="border: none; padding-bottom: 5px;">
@@ -75,20 +90,20 @@ if(isset($_POST['subject'], $_POST['message']))
 				<div class="modal-body" style="padding-top: 0;">
         			<select id="mailing-list" class="form-control" multiple>
         				<?php foreach ($list->items as $item) : ?>
-        						<option><?php echo $item->name ?></option>
+        					<option value="<?php echo $item->address ?>"><?php echo $item->name ?></option>
         				<?php endforeach ?>
         			</select>
         			<div class="clearfix" style="margin-top: 10px;">
-	        			<button type="button" class="btn btn-primary pull-right" style="padding: 6px 27px;">OK</button>
+	        			<button type="button" id="btn-choose-mail-list" class="btn btn-primary pull-right" style="padding: 6px 27px;">OK</button>
 	        		</div>
       			</div>	      			
 			</div>
 		</div>
 	</div>
 	<script>
-		$('#myModal').on('shown.bs.modal', function () {
+		$('#mail-list-modal').on('shown.bs.modal', function () {
 			$('#myInput').focus();
-		})
+		});
 	</script>
 </body>
 </html>

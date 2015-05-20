@@ -13,7 +13,6 @@ define('APP_PATH', 'app/');
 define('MAILGUN_KEY', 'key-8aca73fe155aa1eb250828053ace9b64');
 define('MAILGUN_PUBKEY', 'pubkey-549208ad995507c17a77e3555955a111');
 define('MAILGUN_DOMAIN', 'sandboxad8f7cf2e9ec4e24a48dd69862d46e52.mailgun.org');
-define('MAILGUN_LIST', 'test_list@sandboxad8f7cf2e9ec4e24a48dd69862d46e52.mailgun.org');
 define('MAILGUN_SECRET', 'teaching');
 
 // Get the request page.
