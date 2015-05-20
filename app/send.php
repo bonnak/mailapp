@@ -18,6 +18,7 @@ if(isset($_POST['mail-to'], $_POST['subject'], $_POST['message']))
 	$subject = $_POST['subject'];
 	$message = $_POST['message'];
 
+	// Validate email address.
 	$r_validation = $mgValidate->get("address/parse", array('addresses' => $addressList));
 
 	if(!empty($r_validation->http_response_body->unparseable))
@@ -30,23 +31,29 @@ if(isset($_POST['mail-to'], $_POST['subject'], $_POST['message']))
 			$error_str .= $invalid_mail . ', ';
 		}
 
-		$error_str = trim($error_str, ',') . ' is invalid email address.';
+		$error_str = "<b>Invalid email address :</b> \t\t" . trim($error_str, ', ');
 
 	}
 	else
-	{
+	{		
+		$addressList = explode(',', $addressList);
+
 		try
 		{
-			$result = $mgClient->sendMessage(MAILGUN_DOMAIN, array(
-			    'from'    => 'noreply@itscholar.org',
-			    'to'      => $addressList,
-			    'subject' => $subject,
-			    'text'    => $message
-			));
+			foreach ($addressList as $mail_address) 
+			{
+				$mgClient->sendMessage(MAILGUN_DOMAIN, array(
+				    'from'    => 'info@itscholar.org',
+				    'to'      => trim($mail_address),
+				    'subject' => $subject,
+				    'text'    => $message
+				));
+			}
+
+			$success_sent = true;
 		}
 		catch(Exception $ex)
 		{
-			die();
 		}
 	}	
 }
@@ -69,9 +76,9 @@ if(isset($_POST['mail-to'], $_POST['subject'], $_POST['message']))
     <script type="text/javascript" src="asset/js/global.js"></script>
 </head>
 <body>
-	<?php if(isset($result)): ?>
+	<?php if(isset($success_sent)): ?>
 		<div class="inform-box alert-success">
-			<span>Message sent successfully.</span>
+			<span><b>Message sent successfully</b></span>
 		</div>
 	<?php elseif(isset($error_str)): ?>
 		<div class="inform-box alert-danger">
