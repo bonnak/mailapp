@@ -17,6 +17,8 @@
 }
 .inform-box{
 	position: absolute;
+	top: 0;
+	left: 0;
 	width: 100%;
 	padding: 8px 0;	 
 	text-align: center;
